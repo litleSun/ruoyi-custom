@@ -119,6 +119,13 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
 
+        <!-- mybatis-plus包 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.3.1</version>
+        </dependency>
+
     </dependencies>
 
 </project>
