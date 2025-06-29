@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-8
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1qaz@WSX.123
+      MYSQL_DATABASE: database
+    ports:
+      - "11111:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:5
+    ports:
+      - "11112:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./data:/data
+    restart: always
