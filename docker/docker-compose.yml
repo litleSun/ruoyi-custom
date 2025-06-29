@@ -17,7 +17,7 @@ services:
     image: redis:5
     ports:
       - "11112:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass redis.Password169
     volumes:
       - ./data:/data
     restart: always
