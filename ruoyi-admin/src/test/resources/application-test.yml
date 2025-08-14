@@ -1,0 +1,22 @@
+spring:
+  autoconfigure:
+    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+  datasource:
+    druid:
+      url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/testdb
+      username: test
+      password: test
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      initialSize: 1
+      minIdle: 1
+      maxActive: 5
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      maxEvictableIdleTimeMillis: 900000
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      connectTimeout: 3000
+      socketTimeout: 12000
