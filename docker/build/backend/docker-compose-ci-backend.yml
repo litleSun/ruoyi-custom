@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  PLACEHOLDER_BACKEND_SERVICE:
+    image: DOCKER_REGISTRY/REPOSITORY/BACKEND_IMAGE:taglast
+    container_name: PLACEHOLDER_BACKEND_SERVICE
+    networks:
+      - PLACEHOLDER_BACKEND_SERVICE_net
+    environment:
+      - TZ=Asia/Shanghai
+      - DB_HOST=192.168.1.102
+      - DB_PORT=11131
+      - DB_NAME=basedata
+      - DB_USERNAME=root
+      - DB_PASSWORD=1qaz@WSX.123
+      - REDIS_HOST=192.168.1.102
+      - REDIS_PORT=11132
+      - REDIS_PASSWORD=redis.Password169
+      - OPENAI_API_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+      - OPENAI_API_KEY=sk-7173bac8a4e54d47acbac99db8e359fc
+      - OPENAI_MODEL=qwen2.5-7b-instruct
+    ports:
+      - "11103:8080"
+    restart: always
+
+networks:
+  PLACEHOLDER_BACKEND_SERVICE_net:
+    name: PLACEHOLDER_BACKEND_SERVICE_net
+    driver: bridge
+
+

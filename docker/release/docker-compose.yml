@@ -1,0 +1,84 @@
+version: '3.8'
+services:
+  vote_backend:
+    image: vote_backend:latest
+    container_name: ys-vote
+    environment:
+      - TZ=Asia/Shanghai
+      - DB_HOST=vote-mysql
+      - DB_PORT=3306
+      - DB_NAME=database
+      - DB_USERNAME=root
+      - DB_PASSWORD=1qaz@WSX.123
+      - REDIS_HOST=vote-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis.Password169
+#      - MINIO_ENDPOINT=http://192.168.1.102:9000
+#      - MINIO_ACCESSKEY=minioadmin
+#      - MINIO_SECRETKEY=minioadmin
+#      - MINIO_BUCKETNAME=test
+      #      token过期时间,默认30
+#      - EXPIRE_TIME=720
+    ports:
+      - "11113:8080"
+    restart: always
+    volumes:
+      - ./banckend-data/config:/data/config
+      - ./banckend-data/jar:/data/jar
+      - ./banckend-data/uploadPath:/data/uploadPath
+
+    networks:
+      - https-net
+#    command: "tail -f /dev/null"
+
+  vote_frontend:
+    image: vote_frontend:latest
+    container_name: vote_frontend
+    environment:
+      - VUE_APP_FILE_URL=http://localhost:9090
+      - VUE_APP_API_URL=vote_backend:8080
+    ports:
+      - "11134:80"
+    restart: always
+    volumes:
+      - ./frontend-data/dist:/usr/share/nginx/html
+      - ./frontend-data/nginx/conf.d:/etc/nginx/conf.d
+      - ./frontend-data/nginx/log:/var/log/nginx
+    networks:
+      - https-net
+#    如果需要debug可以打开
+#    command: ["nginx-debug", "-g", "daemon off;"]
+
+  vote-mysql:
+    image: mysql:8.0
+    container_name: mysql-8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: 1qaz@WSX.123
+      MYSQL_DATABASE: database
+    ports:
+      - "11111:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    restart: always
+    networks:
+      - https-net
+
+  vote-redis:
+    image: redis:5
+    ports:
+      - "11112:6379"
+    command: redis-server --appendonly yes --requirepass redis.Password169
+    volumes:
+      - ./redis-data:/data
+    restart: always
+    networks:
+      - https-net
+    
+
+networks:
+  https-net:
+    external: true
+# networks:
+#   vote-network:
+#     driver: bridge

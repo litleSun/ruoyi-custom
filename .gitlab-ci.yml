@@ -1,0 +1,124 @@
+stages:
+  - build
+  - package
+  - release
+
+variables:
+  IMAGE_TAG: $CI_COMMIT_REF_NAME-$CI_COMMIT_SHA
+  DOCKER_REGISTRY: 192.168.1.102:32360
+  DOCKER_REPOSITORY_BACKEND: devops/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}_backend
+  DOCKER_REPOSITORY_FRONTEND: devops/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}_frontend
+  DOCKER_IMAGE_BACKEND: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY_BACKEND}:${IMAGE_TAG}
+  DOCKER_IMAGE_FRONTEND: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY_FRONTEND}:${IMAGE_TAG}
+
+# 后端构建配置
+build_backend:
+  tags:
+    - docker_build
+  stage: build
+  image: maven:3.8-adoptopenjdk-8
+  script:
+    - mvn clean package -Dmaven.test.skip=true -s /home/build-cache/maven/settings.xml
+    - mkdir -p ./target
+    - cp ruoyi-admin/target/*.jar ./target
+  artifacts:
+    paths:
+      - ./target/*.jar
+    expire_in: 2 days
+  only:
+    refs:
+      - dev_backend
+
+# 前端构建配置
+build_frontend:
+  tags:
+    - docker_build
+  stage: build
+  image: cimg/node:20.16
+  script:
+    - cd ./ruoyi-ui
+    - npm install --registry=https://registry.npmmirror.com --cache /home/build-cache/npm
+    - export NODE_OPTIONS=--openssl-legacy-provider
+    - npm run build:prod
+  artifacts:
+    paths:
+      - ./ruoyi-ui/dist
+    expire_in: 2 days
+  only:
+    refs:
+      - dev-frontend
+
+# 后端打包配置
+package_backend:
+  tags:
+    - docker_build
+  stage: package
+  image:
+    name: anjia0532/kaniko-project.executor:v1.11.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor --context "${CI_PROJECT_DIR}" --dockerfile "${CI_PROJECT_DIR}/docker/build/backend/Dockerfile" --destination "${DOCKER_IMAGE_BACKEND}" --registry-mirror "1jmsl763.mirror.aliyuncs.com"
+  dependencies:
+    - build_backend
+  only:
+    refs:
+      - dev_backend
+
+# 前端打包配置
+package_frontend:
+  tags:
+    - docker_build
+  stage: package
+  image:
+    name: anjia0532/kaniko-project.executor:v1.11.0-debug
+    entrypoint: [""]
+  script:
+    # 先替换nginx配置中的后端服务地址
+    - sed -i "s|DOCKER_BACKEND_SERVICE_URL|http://${CI_PROJECT_NAME}_backend:8080/|g" docker/build/frontend/nginx.conf
+    # 然后构建Docker镜像
+    - /kaniko/executor --context "${CI_PROJECT_DIR}" --dockerfile "${CI_PROJECT_DIR}/docker/build/frontend/Dockerfile" --destination "${DOCKER_IMAGE_FRONTEND}"
+  dependencies:
+    - build_frontend
+  only:
+    refs:
+      - dev-frontend
+
+# 后端发布配置
+release_backend:
+  tags:
+    - release_test_env
+  stage: release
+  script:
+    - cd ./docker
+    - 'sed -i "s|PLACEHOLDER_BACKEND_SERVICE:|${CI_PROJECT_NAME}_backend:|g" build/backend/docker-compose-ci-backend.yml'
+    - 'sed -i "s|container_name: PLACEHOLDER_BACKEND_SERVICE|container_name: ${CI_PROJECT_NAME}_backend|g" build/backend/docker-compose-ci-backend.yml'
+    - 'sed -i "s|image: DOCKER_REGISTRY/REPOSITORY/BACKEND_IMAGE:taglast|image: ${DOCKER_IMAGE_BACKEND}|g" build/backend/docker-compose-ci-backend.yml'
+    # 修改网络名称
+    - 'sed -i "s|PLACEHOLDER_BACKEND_SERVICE_net|${CI_PROJECT_NAME}_backendnet|g" build/backend/docker-compose-ci-backend.yml'
+    - docker compose -f build/backend/docker-compose-ci-backend.yml down
+    - docker compose -f build/backend/docker-compose-ci-backend.yml up -d
+  dependencies:
+    - package_backend
+  only:
+    refs:
+      - dev_backend
+
+# 前端发布配置
+release_frontend:
+  tags:
+    - release_test_env
+  stage: release
+  script:
+    - cd ./docker
+    - 'sed -i "s|PLACEHOLDER_FRONTEND_SERVICE:|${CI_PROJECT_NAME}_frontend:|g" build/frontend/docker-compose-ci-frontend.yml'
+    - 'sed -i "s|container_name: PLACEHOLDER_FRONTEND_SERVICE|container_name: ${CI_PROJECT_NAME}_frontend|g" build/frontend/docker-compose-ci-frontend.yml'
+    - 'sed -i "s|image: DOCKER_REGISTRY/REPOSITORY/FRONTEND_IMAGE:taglast|image: ${DOCKER_IMAGE_FRONTEND}|g" build/frontend/docker-compose-ci-frontend.yml'
+    # 修改网络名称
+    - 'sed -i "s|PLACEHOLDER_BACKEND_SERVICE_net|${CI_PROJECT_NAME}_backendnet|g" build/frontend/docker-compose-ci-frontend.yml'
+    - docker compose -f build/frontend/docker-compose-ci-frontend.yml down
+    - docker compose -f build/frontend/docker-compose-ci-frontend.yml up -d
+  dependencies:
+    - package_frontend
+  only:
+    refs:
+      - dev-frontend
