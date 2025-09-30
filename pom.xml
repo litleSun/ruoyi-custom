@@ -24,8 +24,8 @@
         <swagger.version>3.0.0</swagger.version>
         <kaptcha.version>2.3.3</kaptcha.version>
         <pagehelper.boot.version>1.4.7</pagehelper.boot.version>
-        <fastjson.version>2.0.57</fastjson.version>
-        <oshi.version>6.8.2</oshi.version>
+        <fastjson.version>2.0.58</fastjson.version>
+        <oshi.version>6.8.3</oshi.version>
         <commons.io.version>2.19.0</commons.io.version>
         <poi.version>4.1.2</poi.version>
         <velocity.version>2.3</velocity.version>
@@ -33,7 +33,7 @@
         <!-- override dependency version -->
         <tomcat.version>9.0.108</tomcat.version>
         <logback.version>1.2.13</logback.version>
-        <spring-security.version>5.7.12</spring-security.version>
+        <spring-security.version>5.7.14</spring-security.version>
         <spring-framework.version>5.3.39</spring-framework.version>
         <!-- test stack versions -->
         <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
