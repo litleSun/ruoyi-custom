@@ -46,7 +46,7 @@ build_frontend:
     expire_in: 2 days
   only:
     refs:
-      - dev-frontend
+      - dev_frontend
 
 # 后端打包配置
 package_backend:
@@ -81,7 +81,7 @@ package_frontend:
     - build_frontend
   only:
     refs:
-      - dev-frontend
+      - dev_frontend
 
 # 后端发布配置
 release_backend:
@@ -121,4 +121,4 @@ release_frontend:
     - package_frontend
   only:
     refs:
-      - dev-frontend
+      - dev_frontend
