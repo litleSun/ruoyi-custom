@@ -69,6 +69,14 @@ public interface SysDeptMapper
     public int checkDeptExistUser(Long deptId);
 
     /**
+     * 查询部门是否存在员工。
+     *
+     * @param deptId 部门ID
+     * @return 结果
+     */
+    public int checkDeptExistEmployee(Long deptId);
+
+    /**
      * 校验部门名称是否唯一
      * 
      * @param deptName 部门名称
@@ -115,4 +123,12 @@ public interface SysDeptMapper
      * @return 结果
      */
     public int deleteDeptById(Long deptId);
+
+    /**
+     * 根据ID集合查询部门。
+     *
+     * @param deptIds 部门ID集合
+     * @return 部门列表
+     */
+    public List<SysDept> selectDeptByIds(@Param("deptIds") List<Long> deptIds);
 }

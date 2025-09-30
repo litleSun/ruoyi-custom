@@ -80,4 +80,23 @@ INSERT INTO `sys_user_employee` (`id`, `user_id`, `employee_id`, `create_time`)
 VALUES
   (4001, 1, 2001, sysdate());
 
+-- ----------------------------
+-- 4、员工管理菜单
+-- ----------------------------
+INSERT INTO `sys_menu` VALUES ('118', '员工管理', '1', '10', 'employee', 'system/employee/index', '', '', 1, 0, 'C', '0', '0', 'system:employee:list', 'user', 'admin', sysdate(), '', NULL, '员工管理菜单');
+INSERT INTO `sys_menu` VALUES ('1200', '员工查询', '118', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'system:employee:query', '#', 'admin', sysdate(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES ('1201', '员工新增', '118', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'system:employee:add', '#', 'admin', sysdate(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES ('1202', '员工修改', '118', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'system:employee:edit', '#', 'admin', sysdate(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES ('1203', '员工删除', '118', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'system:employee:remove', '#', 'admin', sysdate(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES ('1204', '员工导出', '118', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'system:employee:export', '#', 'admin', sysdate(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES ('1205', '账号绑定', '118', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'system:employee:bind', '#', 'admin', sysdate(), '', NULL, '');
+
+INSERT INTO `sys_role_menu` VALUES ('2', '118');
+INSERT INTO `sys_role_menu` VALUES ('2', '1200');
+INSERT INTO `sys_role_menu` VALUES ('2', '1201');
+INSERT INTO `sys_role_menu` VALUES ('2', '1202');
+INSERT INTO `sys_role_menu` VALUES ('2', '1203');
+INSERT INTO `sys_role_menu` VALUES ('2', '1204');
+INSERT INTO `sys_role_menu` VALUES ('2', '1205');
+
 SET FOREIGN_KEY_CHECKS = 1;
