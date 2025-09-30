@@ -164,6 +164,13 @@ public class SysDeptServiceImpl implements ISysDeptService
         return result > 0;
     }
 
+    @Override
+    public boolean checkDeptExistEmployee(Long deptId)
+    {
+        int result = deptMapper.checkDeptExistEmployee(deptId);
+        return result > 0;
+    }
+
     /**
      * 校验部门名称是否唯一
      * 

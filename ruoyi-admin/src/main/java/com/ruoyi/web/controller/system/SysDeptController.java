@@ -126,6 +126,10 @@ public class SysDeptController extends BaseController
         {
             return warn("部门存在用户,不允许删除");
         }
+        if (deptService.checkDeptExistEmployee(deptId))
+        {
+            return warn("部门存在员工,请先重新分配");
+        }
         deptService.checkDeptDataScope(deptId);
         return toAjax(deptService.deleteDeptById(deptId));
     }

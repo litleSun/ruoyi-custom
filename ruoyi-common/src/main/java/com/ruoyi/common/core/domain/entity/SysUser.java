@@ -29,6 +29,17 @@ public class SysUser extends BaseEntity
     @Excel(name = "部门编号", type = Type.IMPORT)
     private Long deptId;
 
+    /** 绑定员工ID */
+    private Long employeeId;
+
+    /** 绑定员工编号 */
+    @Excel(name = "绑定员工编号", type = Type.EXPORT)
+    private String employeeCode;
+
+    /** 绑定员工姓名 */
+    @Excel(name = "绑定员工", type = Type.EXPORT)
+    private String employeeName;
+
     /** 用户账号 */
     @Excel(name = "登录名称")
     private String userName;
@@ -130,6 +141,36 @@ public class SysUser extends BaseEntity
     public void setDeptId(Long deptId)
     {
         this.deptId = deptId;
+    }
+
+    public Long getEmployeeId()
+    {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId)
+    {
+        this.employeeId = employeeId;
+    }
+
+    public String getEmployeeCode()
+    {
+        return employeeCode;
+    }
+
+    public void setEmployeeCode(String employeeCode)
+    {
+        this.employeeCode = employeeCode;
+    }
+
+    public String getEmployeeName()
+    {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName)
+    {
+        this.employeeName = employeeName;
     }
 
     @Xss(message = "用户昵称不能包含脚本字符")
@@ -314,7 +355,10 @@ public class SysUser extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("userId", getUserId())
-            .append("deptId", getDeptId())
+                .append("deptId", getDeptId())
+                .append("employeeId", getEmployeeId())
+                .append("employeeCode", getEmployeeCode())
+                .append("employeeName", getEmployeeName())
             .append("userName", getUserName())
             .append("nickName", getNickName())
             .append("email", getEmail())

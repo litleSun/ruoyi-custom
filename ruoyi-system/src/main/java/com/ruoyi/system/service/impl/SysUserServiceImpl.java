@@ -29,6 +29,7 @@ import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysDeptService;
+import com.ruoyi.system.service.ISysEmployeeService;
 import com.ruoyi.system.service.ISysUserService;
 
 /**
@@ -61,6 +62,9 @@ public class SysUserServiceImpl implements ISysUserService
 
     @Autowired
     private ISysDeptService deptService;
+
+    @Autowired
+    private ISysEmployeeService employeeService;
 
     @Autowired
     protected Validator validator;
@@ -266,6 +270,10 @@ public class SysUserServiceImpl implements ISysUserService
         insertUserPost(user);
         // 新增用户与角色管理
         insertUserRole(user);
+        if (rows > 0 && user.getEmployeeId() != null)
+        {
+            employeeService.bindUser(user.getEmployeeId(), user.getUserId());
+        }
         return rows;
     }
 
@@ -300,7 +308,16 @@ public class SysUserServiceImpl implements ISysUserService
         userPostMapper.deleteUserPostByUserId(userId);
         // 新增用户与岗位管理
         insertUserPost(user);
-        return userMapper.updateUser(user);
+        int rows = userMapper.updateUser(user);
+        if (rows > 0 && user.getEmployeeId() != null)
+        {
+            employeeService.bindUser(user.getEmployeeId(), user.getUserId());
+        }
+        else if (rows > 0)
+        {
+            employeeService.unbindByUserId(user.getUserId());
+        }
+        return rows;
     }
 
     /**
@@ -449,6 +466,7 @@ public class SysUserServiceImpl implements ISysUserService
         userRoleMapper.deleteUserRoleByUserId(userId);
         // 删除用户与岗位表
         userPostMapper.deleteUserPostByUserId(userId);
+        employeeService.unbindByUserId(userId);
         return userMapper.deleteUserById(userId);
     }
 
@@ -471,6 +489,13 @@ public class SysUserServiceImpl implements ISysUserService
         userRoleMapper.deleteUserRole(userIds);
         // 删除用户与岗位关联
         userPostMapper.deleteUserPost(userIds);
+        for (Long userId : userIds)
+        {
+            if (userId != null)
+            {
+                employeeService.unbindByUserId(userId);
+            }
+        }
         return userMapper.deleteUserByIds(userIds);
     }
 

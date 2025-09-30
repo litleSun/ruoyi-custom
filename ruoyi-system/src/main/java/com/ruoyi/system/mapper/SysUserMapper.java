@@ -124,4 +124,12 @@ public interface SysUserMapper
      * @return 结果
      */
     public SysUser checkEmailUnique(String email);
+
+    /**
+     * 根据ID集合查询账号简要信息。
+     *
+     * @param userIds 用户ID集合
+     * @return 用户列表
+     */
+    public List<SysUser> selectSimpleUserListByIds(@Param("userIds") List<Long> userIds);
 }

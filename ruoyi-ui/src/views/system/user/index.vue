@@ -62,6 +62,12 @@
               <el-table-column label="用户名称" align="center" key="userName" prop="userName" v-if="columns.userName.visible" :show-overflow-tooltip="true" />
               <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" v-if="columns.nickName.visible" :show-overflow-tooltip="true" />
               <el-table-column label="部门" align="center" key="deptName" prop="dept.deptName" v-if="columns.deptName.visible" :show-overflow-tooltip="true" />
+              <el-table-column label="绑定员工" align="center" key="employeeName" v-if="columns.employeeName.visible">
+                <template slot-scope="scope">
+                  <span v-if="formatEmployeeCell(scope.row)">{{ formatEmployeeCell(scope.row) }}</span>
+                  <span v-else class="text-muted">未绑定</span>
+                </template>
+              </el-table-column>
               <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" v-if="columns.phonenumber.visible" width="120" />
               <el-table-column label="状态" align="center" key="status" v-if="columns.status.visible">
                 <template slot-scope="scope">
@@ -150,6 +156,30 @@
           </el-col>
         </el-row>
         <el-row>
+          <el-col :span="24">
+            <el-form-item label="绑定员工">
+              <el-select
+                v-model="form.employeeId"
+                filterable
+                clearable
+                remote
+                reserve-keyword
+                placeholder="请选择员工或保留为空"
+                :remote-method="searchEmployeeOptions"
+                :loading="employeeLoading"
+              >
+                <el-option
+                  v-for="item in employeeOptions"
+                  :key="item.employeeId"
+                  :label="formatEmployeeOption(item)"
+                  :value="item.employeeId"
+                />
+              </el-select>
+              <div class="form-tip">未选择则保持独立账号</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
           <el-col :span="12">
             <el-form-item label="岗位">
               <el-select v-model="form.postIds" multiple placeholder="请选择岗位">
@@ -202,6 +232,7 @@
 
 <script>
 import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus, deptTreeSelect } from "@/api/system/user"
+import { listEmployeeOptions, getEmployee as getEmployeeDetail } from "@/api/system/employee"
 import { getToken } from "@/utils/auth"
 import Treeselect from "@riophae/vue-treeselect"
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"
@@ -246,6 +277,9 @@ export default {
       postOptions: [],
       // 角色选项
       roleOptions: [],
+      // 绑定员工下拉数据
+      employeeOptions: [],
+      employeeLoading: false,
       // 表单参数
       form: {},
       defaultProps: {
@@ -282,6 +316,7 @@ export default {
         userName: { label: '用户名称', visible: true },
         nickName: { label: '用户昵称', visible: true },
         deptName: { label: '部门', visible: true },
+        employeeName: { label: '绑定员工', visible: true },
         phonenumber: { label: '手机号码', visible: true },
         status: { label: '状态', visible: true },
         createTime: { label: '创建时间', visible: true }
@@ -381,6 +416,68 @@ export default {
         row.status = row.status === "0" ? "1" : "0"
       })
     },
+    // 查询可绑定员工
+    searchEmployeeOptions(keyword) {
+      this.employeeLoading = true
+      const params = { keyword, excludeBound: true }
+      if (this.form && this.form.employeeId) {
+        params.includeEmployeeId = this.form.employeeId
+      }
+      listEmployeeOptions(params).then(response => {
+        const list = response.data || response.rows || []
+        this.employeeOptions = list
+        this.employeeLoading = false
+        this.ensureSelectedEmployeeOption()
+      }).catch(() => {
+        this.employeeLoading = false
+      })
+    },
+    ensureSelectedEmployeeOption() {
+      if (!this.form || !this.form.employeeId) {
+        return
+      }
+      const exists = this.employeeOptions.some(item => item.employeeId === this.form.employeeId)
+      if (exists) {
+        return
+      }
+      getEmployeeDetail(this.form.employeeId).then(response => {
+        const data = response.data
+        if (data) {
+          this.employeeOptions.push({
+            employeeId: data.employeeId,
+            employeeCode: data.employeeCode,
+            employeeName: data.employeeName
+          })
+        }
+      })
+    },
+    formatEmployeeOption(item) {
+      if (!item) {
+        return ''
+      }
+      const name = item.employeeName || ''
+      if (item.employeeCode) {
+        return `${name}（${item.employeeCode}）`
+      }
+      return name
+    },
+    formatEmployeeCell(row) {
+      if (!row) {
+        return ''
+      }
+      if (row.employeeName) {
+        return row.employeeCode ? `${row.employeeName}（${row.employeeCode}）` : row.employeeName
+      }
+      const bound = row.employee || row.bindEmployee || row.employeeInfo
+      if (bound) {
+        const name = bound.employeeName || bound.name
+        if (!name) {
+          return ''
+        }
+        return bound.employeeCode ? `${name}（${bound.employeeCode}）` : name
+      }
+      return ''
+    },
     // 取消按钮
     cancel() {
       this.open = false
@@ -400,9 +497,11 @@ export default {
         status: "0",
         remark: undefined,
         postIds: [],
-        roleIds: []
+        roleIds: [],
+        employeeId: undefined
       }
       this.resetForm("form")
+      this.employeeOptions = []
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -445,6 +544,7 @@ export default {
         this.open = true
         this.title = "添加用户"
         this.form.password = this.initPassword
+        this.searchEmployeeOptions('')
       })
     },
     /** 修改按钮操作 */
@@ -452,7 +552,7 @@ export default {
       this.reset()
       const userId = row.userId || this.ids
       getUser(userId).then(response => {
-        this.form = response.data
+        this.form = Object.assign({}, this.form, response.data || {})
         this.postOptions = response.posts
         this.roleOptions = response.roles
         this.$set(this.form, "postIds", response.postIds)
@@ -460,6 +560,8 @@ export default {
         this.open = true
         this.title = "修改用户"
         this.form.password = ""
+        this.ensureSelectedEmployeeOption()
+        this.searchEmployeeOptions('')
       })
     },
     /** 重置密码按钮操作 */
@@ -551,3 +653,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.text-muted {
+  color: #909399;
+}
+.form-tip {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+</style>

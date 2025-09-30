@@ -84,6 +84,14 @@ public interface ISysDeptService
     public boolean checkDeptExistUser(Long deptId);
 
     /**
+     * 查询部门是否存在员工。
+     *
+     * @param deptId 部门ID
+     * @return 结果
+     */
+    public boolean checkDeptExistEmployee(Long deptId);
+
+    /**
      * 校验部门名称是否唯一
      * 
      * @param dept 部门信息
