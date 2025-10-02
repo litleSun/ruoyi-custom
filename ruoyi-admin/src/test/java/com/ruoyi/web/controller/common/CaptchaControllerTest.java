@@ -2,8 +2,9 @@ package com.ruoyi.web.controller.common;
 
 import com.google.code.kaptcha.Producer;
 import com.ruoyi.common.config.RuoYiConfig;
-import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.system.service.ISysConfigService;
+import com.ruoyi.test.base.BaseControllerTestTemplate;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.awt.image.BufferedImage;
@@ -23,19 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CaptchaController.class)
-class CaptchaControllerTest {
+class CaptchaControllerTest extends BaseControllerTestTemplate {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private ISysConfigService configService;
-
-    @MockBean
-    private RedisCache redisCache;
-
-    @MockBean
-    private com.ruoyi.framework.web.service.TokenService tokenService;
 
     @MockBean(name = "captchaProducer")
     private Producer captchaProducer;
