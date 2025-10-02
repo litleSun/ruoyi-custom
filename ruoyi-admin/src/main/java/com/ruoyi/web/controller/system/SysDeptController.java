@@ -35,6 +35,16 @@ public class SysDeptController extends BaseController
     private ISysDeptService deptService;
 
     /**
+     * 获取员工模块使用的部门树
+     */
+    @PreAuthorize("@ss.hasPermi('system:employee:list')")
+    @GetMapping("/employee/tree")
+    public AjaxResult employeeDeptTree(SysDept dept)
+    {
+        return success(deptService.selectDeptTreeList(dept));
+    }
+
+    /**
      * 获取部门列表
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")

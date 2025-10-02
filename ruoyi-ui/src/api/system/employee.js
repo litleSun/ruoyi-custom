@@ -100,3 +100,11 @@ export function unbindEmployeeAccount(employeeId) {
     method: 'delete'
   })
 }
+
+// 查询员工模块可用的部门下拉树结构
+export function deptTreeSelect() {
+  return request({
+    url: '/system/dept/employee/tree',
+    method: 'get'
+  })
+}
