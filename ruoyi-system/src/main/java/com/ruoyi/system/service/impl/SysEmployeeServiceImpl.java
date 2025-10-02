@@ -9,6 +9,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.uuid.Seq;
 import com.ruoyi.system.domain.employee.SysEmployee;
 import com.ruoyi.system.domain.employee.SysEmployeeDept;
 import com.ruoyi.system.domain.employee.SysUserEmployee;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SysEmployeeServiceImpl extends ServiceImpl<SysEmployeeMapper, SysEmployee> implements ISysEmployeeService
 {
     private static final String DATA_SCOPE = "dataScope";
+    private static final String EMPLOYEE_CODE_PREFIX = "EMP";
 
     @Autowired
     private SysEmployeeDeptMapper employeeDeptMapper;
@@ -307,9 +309,11 @@ public class SysEmployeeServiceImpl extends ServiceImpl<SysEmployeeMapper, SysEm
         {
             throw new ServiceException("员工信息不能为空");
         }
-        if (StringUtils.isEmpty(employee.getEmployeeCode()))
+        employee.setEmployeeCode(StringUtils.trim(employee.getEmployeeCode()));
+        applyDefaultEmployeeCode(employee);
+        if (StringUtils.isNotEmpty(employee.getEmployeeCode()) && employee.getEmployeeCode().length() > 64)
         {
-            throw new ServiceException("员工编号不能为空");
+            throw new ServiceException("员工编号长度不能超过64个字符");
         }
         if (StringUtils.isEmpty(employee.getEmployeeName()))
         {
@@ -349,6 +353,21 @@ public class SysEmployeeServiceImpl extends ServiceImpl<SysEmployeeMapper, SysEm
                 throw new ServiceException("部门 " + dept.getDeptName() + " 已停用");
             }
         }
+    }
+
+
+    private void applyDefaultEmployeeCode(SysEmployee employee)
+    {
+        if (employee == null || StringUtils.isNotEmpty(employee.getEmployeeCode()))
+        {
+            return;
+        }
+        employee.setEmployeeCode(generateEmployeeCode());
+    }
+
+    private String generateEmployeeCode()
+    {
+        return EMPLOYEE_CODE_PREFIX + Seq.getId();
     }
 
     private void saveEmployeeDepts(Long employeeId, Collection<Long> deptIds)

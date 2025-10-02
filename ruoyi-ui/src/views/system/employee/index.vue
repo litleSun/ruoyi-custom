@@ -465,8 +465,17 @@ export default {
       },
       rules: {
         employeeCode: [
-          { required: true, message: '员工编号不能为空', trigger: 'blur' },
-          { min: 1, max: 64, message: '员工编号长度必须介于 1 和 64 之间', trigger: 'blur' }
+          {
+            validator(rule, value, callback) {
+              const code = (value || '').trim()
+              if (code && code.length > 64) {
+                callback(new Error('员工编号长度不能超过64个字符'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
         ],
         employeeName: [
           { required: true, message: '员工姓名不能为空', trigger: 'blur' }
@@ -628,6 +637,12 @@ export default {
       this.$refs['form'].validate(valid => {
         if (!valid) {
           return
+        }
+        if (typeof this.form.employeeCode === 'string') {
+          this.form.employeeCode = this.form.employeeCode.trim()
+          if (!this.form.employeeCode) {
+            this.form.employeeCode = undefined
+          }
         }
         const submit = this.form.employeeId ? updateEmployee : addEmployee
         submit(this.form).then(() => {

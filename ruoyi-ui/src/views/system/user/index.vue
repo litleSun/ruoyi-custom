@@ -436,7 +436,8 @@ export default {
       if (!this.form || !this.form.employeeId) {
         return
       }
-      const exists = this.employeeOptions.some(item => item.employeeId === this.form.employeeId)
+      const targetId = this.form.employeeId
+      const exists = this.employeeOptions.some(item => String(item.employeeId) === String(targetId))
       if (exists) {
         return
       }
