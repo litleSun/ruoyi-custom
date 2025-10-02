@@ -123,7 +123,8 @@ public class SysEmployeeController extends BaseController
     @GetMapping("/options")
     public AjaxResult options(String keyword, Boolean excludeBound, Long includeEmployeeId)
     {
-        List<SysEmployee> list = employeeService.selectEmployeeOptions(keyword, Boolean.TRUE.equals(excludeBound), includeEmployeeId);
+        SysEmployee query = new SysEmployee();
+        List<SysEmployee> list = employeeService.selectEmployeeOptions(query, keyword, Boolean.TRUE.equals(excludeBound), includeEmployeeId);
         return success(list);
     }
 
