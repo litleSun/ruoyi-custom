@@ -60,12 +60,13 @@ public interface ISysEmployeeService
     /**
      * 查询可选员工列表。
      *
+     * @param employee 查询参数
      * @param keyword 关键字
      * @param excludeBound 是否排除已绑定员工
      * @param includeEmployeeId 额外包含的员工ID
      * @return 员工集合
      */
-    List<SysEmployee> selectEmployeeOptions(String keyword, boolean excludeBound, Long includeEmployeeId);
+    List<SysEmployee> selectEmployeeOptions(SysEmployee employee, String keyword, boolean excludeBound, Long includeEmployeeId);
 
     /**
      * 查询可绑定账号列表。

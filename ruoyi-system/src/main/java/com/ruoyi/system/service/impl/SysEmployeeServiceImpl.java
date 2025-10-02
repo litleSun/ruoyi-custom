@@ -158,11 +158,15 @@ public class SysEmployeeServiceImpl extends ServiceImpl<SysEmployeeMapper, SysEm
     }
 
     @Override
-    public List<SysEmployee> selectEmployeeOptions(String keyword, boolean excludeBound, Long includeEmployeeId)
+    @DataScope(deptAlias = "d")
+    public List<SysEmployee> selectEmployeeOptions(SysEmployee employee, String keyword, boolean excludeBound, Long includeEmployeeId)
     {
-        LambdaQueryWrapper<SysEmployee> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysEmployee::getDelFlag, UserConstants.NORMAL)
-                .eq(SysEmployee::getStatus, UserConstants.NORMAL);
+        SysEmployee query = employee == null ? new SysEmployee() : employee;
+        if (StringUtils.isEmpty(query.getStatus()))
+        {
+            query.setStatus(UserConstants.NORMAL);
+        }
+        LambdaQueryWrapper<SysEmployee> wrapper = buildQueryWrapper(query);
         if (StringUtils.isNotEmpty(keyword))
         {
             wrapper.and(w -> w.like(SysEmployee::getEmployeeCode, keyword)
@@ -176,7 +180,9 @@ public class SysEmployeeServiceImpl extends ServiceImpl<SysEmployeeMapper, SysEm
         List<SysEmployee> list = list(wrapper);
         if (includeEmployeeId != null)
         {
-            SysEmployee include = getById(includeEmployeeId);
+            LambdaQueryWrapper<SysEmployee> includeWrapper = buildQueryWrapper(query);
+            includeWrapper.eq(SysEmployee::getEmployeeId, includeEmployeeId);
+            SysEmployee include = getOne(includeWrapper, false);
             if (include != null && list.stream().noneMatch(item -> item.getEmployeeId().equals(includeEmployeeId)))
             {
                 list.add(0, include);

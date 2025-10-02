@@ -403,9 +403,9 @@ import {
   exportEmployee,
   listEmployeeBindCandidates,
   bindEmployeeAccount,
-  unbindEmployeeAccount
+  unbindEmployeeAccount,
+  deptTreeSelect
 } from '@/api/system/employee'
-import { deptTreeSelect } from '@/api/system/user'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 import { Splitpanes, Pane } from 'splitpanes'
